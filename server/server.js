@@ -5,10 +5,12 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const d3_rnd = require('d3-random');
 
+const http_port = 5000;
+
 let stocks = [{
   symbol: 'CSCO',
   open: 50,
-  current: 50
+  last: 50
 }];
 const sigma = 0.25; // standard deviation
 // Brownian motion formula
@@ -38,11 +40,11 @@ io.on('connection', function (socket) {
     stocks = updatePrices(stocks);
     const json = JSON.stringify(stocks);
     io.emit('message', [new Date(), json]);
-    //console.log([new Date(), json]);
+    // console.log([new Date(), json]);
   }, 3000)
 });
 
-http.listen(5000, async function () {
-  //await open('http://localhost:5000');
-  console.log('listening on *:5000');
+http.listen(http_port, async function () {
+  // await open(`http://localhost:${http_port}`);
+  console.log(`listening on *:${http_port}`);
 });

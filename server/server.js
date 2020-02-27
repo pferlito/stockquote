@@ -27,12 +27,14 @@ function updatePrice(price) {
 function updatePrices(stocks) {
   stocks = stocks.map((stock) => {
     stock.current = updatePrice(stock.current);
+    return stock;
   });
+  return stocks;
 }
 
 io.on('connection', function (socket) {
   setInterval(() => {
-    updatePrices(stocks);
+    stocks = updatePrices(stocks);
     const json = JSON.stringify(stocks);
     io.emit('message', [new Date(), json]);
     console.log([new Date(), json]);

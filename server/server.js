@@ -16,6 +16,7 @@ const sigma = 0.25; // standard deviation
 // Brownian motion formula
 const rnFn = d3_rnd.randomNormal(0, Math.pow(sigma, 2));
 
+// serve build directory
 app.use(express.static('public'));
 
 function updatePrice(price) {
@@ -28,7 +29,7 @@ function updatePrice(price) {
 
 function updatePrices(stocks) {
   stocks = stocks.map((stock) => {
-    stock.current = updatePrice(stock.current);
+    stock.last = updatePrice(stock.last);
     return stock;
   });
   return stocks;

@@ -41,7 +41,7 @@ io.on('connection', function (socket) {
   }, 1000)
 });
 
-http.listen(3000, async function () {
-  await open('http://localhost:3000');
-  console.log('listening on *:3000');
+http.listen(5000, async function () {
+  await open('http://localhost:5000');
+  console.log('listening on *:5000');
 });

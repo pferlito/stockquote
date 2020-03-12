@@ -40,8 +40,8 @@ io.on('connection', function (socket) {
   setInterval(() => {
     stocks = updatePrices(stocks);
     const json = JSON.stringify(stocks);
-    io.emit('message', [new Date(), json]);
-    // console.log([new Date(), json]);
+    io.emit('message', {time: new Date(), price: json});
+    //console.log([new Date(), json]);
   }, 3000)
 });
 

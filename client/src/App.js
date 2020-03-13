@@ -16,7 +16,6 @@ function App() {
   });
 
   useEffect(() => {
-    // TODO: look into using a ref to store the data
 
     const socket = socketIOClient(`http://localhost:${http_port}`);
     socket.on('connect', () => {
@@ -24,28 +23,26 @@ function App() {
         return {...config, response: true}
       });
     });
+
     socket.on('message', function (msg) {
       let data = JSON.parse(msg.price).shift();
       console.log(data.last);
       const newPrice = data.last;
-      updateSeries(newPrice);
+      const newOptions = {...options};
+      const pdata = newOptions.series[0].data;
+      if (pdata.length > 20) {
+        pdata.shift();
+      }
+      pdata.push(newPrice);
+      setOptions(newOptions);
     });
+
     socket.on('connect_error', (error) => {
       console.log('connection error: ', error);
       // stop polling on error
       socket.close();
     });
-  }, []);
-
-  function updateSeries(newPrice) {
-    const newOptions = {...options};
-    const data = newOptions.series[0].data;
-    if (data.length > 50) {
-      data.shift();
-    }
-    data.push(newPrice);
-    setOptions(newOptions);
-  }
+  },[]);
 
   return (
     <div>

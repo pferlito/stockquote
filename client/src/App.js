@@ -25,16 +25,18 @@ function App() {
     });
 
     socket.on('message', function (msg) {
-      let data = JSON.parse(msg.price).shift();
-      console.log(data.last);
-      const newPrice = data.last;
-      const newOptions = {...options};
-      const pdata = newOptions.series[0].data;
-      if (pdata.length > 20) {
-        pdata.shift();
-      }
-      pdata.push(newPrice);
-      setOptions(newOptions);
+      let price = JSON.parse(msg.price).shift();
+      console.log(price.last);
+      const newPrice = price.last;
+      setOptions((myOpts) => {
+        const newOpts = {...myOpts};
+        const data = newOpts.series[0].data;
+        data.push(newPrice);
+        if (data.length > 20) {
+          data.shift();
+        }
+        return newOpts;
+      })
     });
 
     socket.on('connect_error', (error) => {

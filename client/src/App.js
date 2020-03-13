@@ -44,6 +44,8 @@ function App() {
       // stop polling on error
       socket.close();
     });
+
+    return socket.close;  // cleanup
   },[]);
 
   return (

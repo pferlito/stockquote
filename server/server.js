@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const open = require('open');
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const d3_rnd = require('d3-random');
@@ -10,6 +9,8 @@ const http_port = 5000;
 let stocks = [{
   symbol: 'CSCO',
   open: 50,
+  high: 50,
+  low: 50,
   last: 50
 }];
 const sigma = 0.25; // standard deviation
@@ -19,17 +20,31 @@ const rnFn = d3_rnd.randomNormal(0, Math.pow(sigma, 2));
 // serve build directory
 app.use(express.static('public'));
 
-function updatePrice(price) {
-  let delta = rnFn();
-  price = price + delta;
+/**
+ * Update a single stock's price data.
+ * @param stock object
+ * @returns object
+ */
+function updateStock(stock) {
+  let last = stock.last;
+  const delta = rnFn();
+  last = last + delta;
   // round to 2 decimal places
-  price = Math.round(price * 100) / 100;
-  return price;
+  last = Math.round(last * 100) / 100;
+  stock.last = last;
+  stock.high = Math.max(stock.high, last);
+  stock.low = Math.min(stock.low, last);
+  return stock;
 }
 
-function updatePrices(stocks) {
+/**
+ * Update stocks price data.
+ * @param stocks Array
+ * @returns Array
+ */
+function updateStocks(stocks) {
   stocks = stocks.map((stock) => {
-    stock.last = updatePrice(stock.last);
+    stock = updateStock(stock);
     return stock;
   });
   return stocks;
@@ -37,11 +52,11 @@ function updatePrices(stocks) {
 
 let interval;
 io.on('connection', function (socket) {
-  setInterval(() => {
-    stocks = updatePrices(stocks);
-    const json = JSON.stringify(stocks);
-    io.emit('message', {time: new Date(), price: json});
-    //console.log([new Date(), json]);
+  interval = setInterval(() => {
+    const priceData = updateStocks(stocks);
+    const jsonPriceData = JSON.stringify(priceData);
+    io.emit('message', {time: Date.now(), price: jsonPriceData});
+    console.log([Date.now(), jsonPriceData]);
   }, 3000)
 });
 

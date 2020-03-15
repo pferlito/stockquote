@@ -8,8 +8,20 @@ const http_port = 5000;
 function App() {
   const [options, setOptions] = useState({
     series: [{
-      data: []
+      data: [],
+      type: 'candlestick',
+      name: 'CSCO Stock Price',
+      id: 'csco'
     }],
+    title: {
+      text: 'CSCO Stock Price'
+    },
+    chart: {
+      animation: false
+    },
+    navigator: {
+      enabled: false
+    }
   });
   const [config, setConfig] = useState({
     response: false
@@ -25,13 +37,14 @@ function App() {
     });
 
     socket.on('message', function (msg) {
+      const time = msg.time;
       let price = JSON.parse(msg.price).shift();
-      console.log(price.last);
-      const newPrice = price.last;
+      console.log(price);
+      const {open, high, low, last} = price;
       setOptions((myOpts) => {
         const newOpts = {...myOpts};
         const data = newOpts.series[0].data;
-        data.push(newPrice);
+        data.push([time, open, high, low, last]);
         if (data.length > 20) {
           data.shift();
         }

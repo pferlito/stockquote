@@ -1,10 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import socketIOClient from 'socket.io-client';
-import Highcharts from 'highcharts';
-import highchartsStock from "highcharts/modules/stock";
+import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
-highchartsStock(Highcharts);
-
 
 const http_port = 5000;
 

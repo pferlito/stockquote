@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from 'react';
 import socketIOClient from 'socket.io-client';
 import Highcharts from 'highcharts';
+import highchartsStock from "highcharts/modules/stock";
 import HighchartsReact from 'highcharts-react-official';
+highchartsStock(Highcharts);
+
 
 const http_port = 5000;
 
 function App() {
   const [options, setOptions] = useState({
-    series: [
-      {data: []}
-    ],
+    series: [{
+      data: []
+    }],
   });
   const [config, setConfig] = useState({
     response: false
@@ -53,6 +56,7 @@ function App() {
       {config.response ? <p/> : <p>Loading</p>}
       <HighchartsReact
         highcharts={Highcharts}
+        constructorType = { 'stockChart' }
         options={options}
       />
     </div>

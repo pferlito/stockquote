@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import socketIOClient from 'socket.io-client';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
@@ -26,6 +26,8 @@ function App() {
   const [config, setConfig] = useState({
     response: false
   });
+  const [price, setPrice] = useState({});
+  const counter = useRef(0);
 
   useEffect(() => {
 
@@ -40,16 +42,7 @@ function App() {
       const time = msg.time;
       let price = JSON.parse(msg.price).shift();
       console.log(price);
-      const {open, high, low, last} = price;
-      setOptions((myOpts) => {
-        const newOpts = {...myOpts};
-        const data = newOpts.series[0].data;
-        data.push([time, open, high, low, last]);
-        if (data.length > 20) {
-          data.shift();
-        }
-        return newOpts;
-      })
+      setPrice(price);
     });
 
     socket.on('connect_error', (error) => {
@@ -59,14 +52,30 @@ function App() {
     });
 
     return socket.close;  // cleanup
-  },[]);
+  }, []);
+
+  useEffect(() => {
+    counter.current++;
+    const {open, high, low, last} = price;
+    let currentData = [...options.series[0].data];
+    if (counter.current % 10 !== 0) {
+      currentData.pop();
+    }
+    currentData.push([Date.now(), open, high, low, last]);
+
+    setOptions({
+      series: [
+        {data: currentData}
+      ]
+    })
+  }, [price]);
 
   return (
     <div>
       {config.response ? <p/> : <p>Loading</p>}
       <HighchartsReact
         highcharts={Highcharts}
-        constructorType = { 'stockChart' }
+        constructorType={'stockChart'}
         options={options}
       />
     </div>

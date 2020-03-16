@@ -59,11 +59,12 @@ function App() {
       const {open, high, low, last} = quote.ohlc[0];
       let currentData = [...options.series[0].data];
       if (minutes.current === quoteMinutes) {
-        currentData.pop();
+        currentData.splice(currentData.length - 1, 1,
+          [quoteTime, open, high, low, last]);
       } else {
         minutes.current = quoteMinutes;
+        currentData.push([quoteTime, open, high, low, last]);
       }
-      currentData.push([quoteTime, open, high, low, last]);
       setOptions({
         series: [
           {data: currentData}

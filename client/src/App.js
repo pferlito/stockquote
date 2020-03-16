@@ -53,6 +53,15 @@ function App() {
     }
   });
 
+  /**
+   * Round timestamp down to the minute.
+   * @param {string} timestamp
+   * @returns {string}
+   */
+  const getMinutes = (timestamp) => {
+    return Math.floor(timestamp / 60000) * 60000;
+  }
+
   useEffect(() => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
@@ -63,11 +72,11 @@ function App() {
       if (minutes.current === quoteMinutes) {
         // update last candlestick
         currentData.splice(lastElement, 1,
-          [quoteTime, open, high, low, last]);
+          [getMinutes(quoteTime), open, high, low, last]);
       } else {
         // create new candlestick
         minutes.current = quoteMinutes;
-        currentData.push([quoteTime, open, high, low, last]);
+        currentData.push([getMinutes(quoteTime), open, high, low, last]);
       }
       setOptions({
         series: [

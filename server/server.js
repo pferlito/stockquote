@@ -22,10 +22,14 @@ app.use(express.static('public'));
 
 /**
  * Update a single stock's price data.
- * @param stock object
- * @returns object
+ * @param {Object} stock
+ * @param {Boolean} rollover
+ * @returns {Object}
  */
-function updateStock(stock) {
+function updateStock(stock, rollover) {
+  if (rollover) {
+    stock.open = stock.last;
+  }
   let last = stock.last;
   const delta = rnFn();
   last = last + delta;
@@ -39,21 +43,30 @@ function updateStock(stock) {
 
 /**
  * Update stocks price data.
- * @param stocks Array
+ * @param {Array} stocks
+ * @param {Boolean} rollover
  * @returns Array
  */
-function updateStocks(stocks) {
+function updateStocks(stocks, rollover) {
   stocks = stocks.map((stock) => {
-    stock = updateStock(stock);
+    stock = updateStock(stock, rollover);
     return stock;
   });
   return stocks;
 }
 
 let interval;
+let currentMinutes = new Date().getMinutes();
+
 io.on('connection', function (socket) {
   interval = setInterval(() => {
-    const priceData = updateStocks(stocks);
+    const minutes = new Date().getMinutes();
+    let rollover = false;
+    if (minutes !== currentMinutes) {
+      currentMinutes = minutes;
+      rollover = true;
+    }
+    const priceData = updateStocks(stocks, rollover);
     io.emit('message', {time: Date.now(), ohlc: priceData});
     console.log([Date.now(), priceData]);
   }, 3000)

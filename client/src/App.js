@@ -21,6 +21,9 @@ function App() {
     },
     navigator: {
       enabled: false
+    },
+    time: {
+      timezoneOffset: 7 * 60
     }
   });
   const [config, setConfig] = useState({
@@ -39,7 +42,6 @@ function App() {
     });
 
     socket.on('message', function (msg) {
-      console.log(msg);
       setQuote(msg);
     });
 

@@ -26,8 +26,8 @@ function App() {
   const [config, setConfig] = useState({
     response: false
   });
-  const [price, setPrice] = useState({});
-  const counter = useRef(0);
+  const [quote, setQuote] = useState({});
+  const minutes = useRef(0);
 
   useEffect(() => {
 
@@ -39,10 +39,8 @@ function App() {
     });
 
     socket.on('message', function (msg) {
-      const time = msg.time;
-      let price = JSON.parse(msg.price).shift();
-      console.log(price);
-      setPrice(price);
+      console.log(msg);
+      setQuote(msg);
     });
 
     socket.on('connect_error', (error) => {
@@ -55,20 +53,24 @@ function App() {
   }, []);
 
   useEffect(() => {
-    counter.current++;
-    const {open, high, low, last} = price;
-    let currentData = [...options.series[0].data];
-    if (counter.current % 10 !== 0) {
-      currentData.pop();
+    if (quote.hasOwnProperty('ohlc')) {
+      const quoteTime = quote.time;
+      const quoteMinutes = new Date(quoteTime).getMinutes();
+      const {open, high, low, last} = quote.ohlc[0];
+      let currentData = [...options.series[0].data];
+      if (minutes.current === quoteMinutes) {
+        currentData.pop();
+      } else {
+        minutes.current = quoteMinutes;
+      }
+      currentData.push([quoteTime, open, high, low, last]);
+      setOptions({
+        series: [
+          {data: currentData}
+        ]
+      })
     }
-    currentData.push([Date.now(), open, high, low, last]);
-
-    setOptions({
-      series: [
-        {data: currentData}
-      ]
-    })
-  }, [price]);
+  }, [quote]);
 
   return (
     <div>

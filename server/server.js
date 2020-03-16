@@ -54,9 +54,8 @@ let interval;
 io.on('connection', function (socket) {
   interval = setInterval(() => {
     const priceData = updateStocks(stocks);
-    const jsonPriceData = JSON.stringify(priceData);
-    io.emit('message', {time: Date.now(), price: jsonPriceData});
-    console.log([Date.now(), jsonPriceData]);
+    io.emit('message', {time: Date.now(), ohlc: priceData});
+    console.log([Date.now(), priceData]);
   }, 3000)
 });
 

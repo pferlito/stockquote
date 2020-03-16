@@ -6,6 +6,12 @@ import HighchartsReact from 'highcharts-react-official';
 const http_port = 5000;
 
 function App() {
+  const [config, setConfig] = useState({
+    response: false
+  });
+  const [quote, setQuote] = useState({});
+  const minutes = useRef(0);
+
   const [options, setOptions] = useState({
     series: [{
       data: [],
@@ -17,7 +23,27 @@ function App() {
       text: 'CSCO Stock Price'
     },
     chart: {
-      animation: false
+      animation: false,
+      events: {
+        load: function () {
+          const socket = socketIOClient(`http://localhost:${http_port}`);
+          socket.on('connect', () => {
+            setConfig((config) => {
+              return {...config, response: true}
+            });
+          });
+
+          socket.on('message', function (msg) {
+            setQuote(msg);
+          });
+
+          socket.on('connect_error', (error) => {
+            console.log('connection error: ', error);
+            // stop polling on error
+            socket.close();
+          });
+        }
+      }
     },
     navigator: {
       enabled: false
@@ -26,33 +52,6 @@ function App() {
       timezoneOffset: 7 * 60
     }
   });
-  const [config, setConfig] = useState({
-    response: false
-  });
-  const [quote, setQuote] = useState({});
-  const minutes = useRef(0);
-
-  useEffect(() => {
-
-    const socket = socketIOClient(`http://localhost:${http_port}`);
-    socket.on('connect', () => {
-      setConfig((config) => {
-        return {...config, response: true}
-      });
-    });
-
-    socket.on('message', function (msg) {
-      setQuote(msg);
-    });
-
-    socket.on('connect_error', (error) => {
-      console.log('connection error: ', error);
-      // stop polling on error
-      socket.close();
-    });
-
-    return socket.close;  // cleanup
-  }, []);
 
   useEffect(() => {
     if (quote.hasOwnProperty('ohlc')) {
@@ -60,10 +59,13 @@ function App() {
       const quoteMinutes = new Date(quoteTime).getMinutes();
       const {open, high, low, last} = quote.ohlc[0];
       let currentData = [...options.series[0].data];
+      let lastElement = currentData.length - 1 ;
       if (minutes.current === quoteMinutes) {
-        currentData.splice(currentData.length - 1, 1,
+        // update last candlestick
+        currentData.splice(lastElement, 1,
           [quoteTime, open, high, low, last]);
       } else {
+        // create new candlestick
         minutes.current = quoteMinutes;
         currentData.push([quoteTime, open, high, low, last]);
       }

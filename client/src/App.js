@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef, useMemo} from 'react';
 import socketIOClient from 'socket.io-client';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
@@ -62,12 +62,17 @@ function App() {
     return Math.floor(timestamp / 60000) * 60000;
   }
 
+  let currentData = useMemo(() => {
+    const currentData = [...options.series[0].data];
+    return currentData;
+  },[options.series]);
+
   useEffect(() => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
       const {open, high, low, last} = quote.ohlc[0];
-      let currentData = [...options.series[0].data];
+      //let currentData = getCurrentData();
       let lastElement = currentData.length - 1 ;
       if (minutes.current === quoteMinutes) {
         // update last candlestick
@@ -84,7 +89,7 @@ function App() {
         ]
       })
     }
-  }, [quote]);
+  }, [quote, currentData]);
 
   return (
     <div>

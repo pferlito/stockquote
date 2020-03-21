@@ -28,7 +28,7 @@ app.use(express.static('public'));
  */
 function updateStock(stock, rollover) {
   if (rollover) {
-    stock.open = stock.high = stock.low = stock.last;
+    stock.open = stock.last;
   }
   let last = stock.last;
   const delta = rnFn();

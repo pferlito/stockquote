@@ -67,22 +67,19 @@ function App() {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
       const {open, high, low, last} = quote.ohlc[0];
-      let currentData = [...options.series[0].data];
-      let lastElement = currentData.length - 1 ;
-      if (minutes.current === quoteMinutes) {
-        // update last candlestick
-        currentData.splice(lastElement, 1,
-          [getMinutes(quoteTime), open, high, low, last]);
-      } else {
-        // create new candlestick
-        minutes.current = quoteMinutes;
-        currentData.push([getMinutes(quoteTime), open, high, low, last]);
-      }
-      setOptions({
-        series: [
-          {data: currentData}
-        ]
-      })
+      setOptions((options) => {
+        let currentData = [...options.series[0].data];
+        if (minutes.current === quoteMinutes) {
+          // update last candlestick
+          currentData.splice(currentData.length - 1, 1,
+            [getMinutes(quoteTime), open, high, low, last]);
+        } else {
+          // create new candlestick
+          minutes.current = quoteMinutes;
+          currentData.push([getMinutes(quoteTime), open, high, low, last]);
+        }
+        return {...options, ...{series: [{data: currentData}]}};
+      });
     }
   }, [quote]);
 

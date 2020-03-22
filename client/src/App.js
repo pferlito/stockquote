@@ -39,6 +39,14 @@ function App() {
           forced: true,
           units: [['minute', [2]]]
         }
+      },  {
+        type: 'hour',
+        count: 2,
+        text: '5 min',
+        dataGrouping: {
+          forced: true,
+          units: [['minute', [5]]]
+        }
       }, {
         type: 'all',
         text: 'All'
@@ -46,7 +54,7 @@ function App() {
       buttonTheme: {
         width: 60
       },
-      selected: 2,
+      selected: 3,
       allButtonsEnabled: true,
       inputEnabled: false
     },

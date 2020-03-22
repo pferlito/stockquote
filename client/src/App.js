@@ -22,6 +22,37 @@ function App() {
     title: {
       text: 'CSCO Stock Price'
     },
+    rangeSelector: {
+      buttons: [{
+        type: 'hour',
+        count: 1,
+        text: '1 min',
+        dataGrouping: {
+          forced: true,
+          units: [['minute', [1]]]
+        }
+      }, {
+        type: 'hour',
+        count: 2,
+        text: '2 min',
+        dataGrouping: {
+          forced: true,
+          units: [['minute', [2]]]
+        }
+      }, {
+        type: 'all',
+        text: 'All'
+      }],
+      buttonTheme: {
+        width: 60
+      },
+      selected: 2,
+      allButtonsEnabled: true,
+      inputEnabled: false
+    },
+    navigator: {
+      enabled: false
+    },
     chart: {
       animation: false,
       events: {
@@ -44,9 +75,6 @@ function App() {
           });
         }
       }
-    },
-    navigator: {
-      enabled: false
     },
     time: {
       timezoneOffset: 7 * 60

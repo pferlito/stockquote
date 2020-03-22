@@ -27,17 +27,17 @@ app.use(express.static('public'));
  * @returns {Object}
  */
 function updateStock(stock, rollover) {
-  if (rollover) {
-    stock.open = stock.last;
-  }
-  let last = stock.last;
   const delta = rnFn();
-  last = last + delta;
+  stock.last = stock.last + delta;
   // round to 2 decimal places
-  last = Math.round(last * 100) / 100;
-  stock.last = last;
-  stock.high = Math.max(stock.high, last);
-  stock.low = Math.min(stock.low, last);
+  stock.last = Math.round(stock.last * 100) / 100;
+
+  if (rollover) {
+    stock.open = stock.high = stock.low = stock.last;
+  } else {
+    stock.high = Math.max(stock.high, stock.last);
+    stock.low = Math.min(stock.low, stock.last);
+  }
   return stock;
 }
 

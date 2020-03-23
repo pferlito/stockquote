@@ -2,6 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import socketIOClient from 'socket.io-client';
 import Highcharts from 'highcharts/highstock';
 import HighchartsReact from 'highcharts-react-official';
+import './App.css';
 
 const http_port = 5000;
 
@@ -77,6 +78,23 @@ function Chart({data}) {
   )
 }
 
+function Table({quote}) {
+  let ohlc = [];
+  if (quote.hasOwnProperty('ohlc')) {
+    console.log(quote.ohlc[0]);
+    ohlc = quote.ohlc[0];
+  }
+  return (
+    <tr>
+      <td>CSCO</td>
+      <td>{ohlc.last}</td>
+      <td>{ohlc.open}</td>
+      <td>{ohlc.high}</td>
+      <td>{ohlc.low}</td>
+    </tr>
+  );
+}
+
 function App() {
   const [quote, setQuote] = useState({});
   const [config, setConfig] = useState({
@@ -139,6 +157,20 @@ function App() {
     <div>
       {config.response ? <p/> : <p>Loading</p>}
       <Chart data={data}/>
+      <table className="holdings">
+        <thead>
+        <tr>
+          <td>Symbol</td>
+          <td>Last</td>
+          <td>Open</td>
+          <td>High</td>
+          <td>Low</td>
+        </tr>
+        </thead>
+        <tbody>
+            <Table quote={quote}/>
+          </tbody>
+      </table>
     </div>
   )
 }

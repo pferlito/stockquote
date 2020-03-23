@@ -5,22 +5,17 @@ import HighchartsReact from 'highcharts-react-official';
 
 const http_port = 5000;
 
-function App() {
-  const [config, setConfig] = useState({
-    response: false
-  });
-  const [quote, setQuote] = useState({});
-  const minutes = useRef(0);
+function Chart({data}) {
 
-  const [options, setOptions] = useState({
+  const options = {
     series: [{
-      data: [],
+      data: data,
       type: 'candlestick',
-      name: 'CSCO Stock Price',
+      name: `CSCO Stock Price`,
       id: 'csco'
     }],
     title: {
-      text: 'CSCO Stock Price'
+      text: `CSCO Stock Price`
     },
     rangeSelector: {
       buttons: [{
@@ -39,7 +34,7 @@ function App() {
           forced: true,
           units: [['minute', [2]]]
         }
-      },  {
+      }, {
         type: 'hour',
         count: 2,
         text: '5 min',
@@ -65,29 +60,30 @@ function App() {
       animation: false,
       events: {
         load: function () {
-          const socket = socketIOClient(`http://localhost:${http_port}`);
-          socket.on('connect', () => {
-            setConfig((config) => {
-              return {...config, response: true}
-            });
-          });
-
-          socket.on('message', function (msg) {
-            setQuote(msg);
-          });
-
-          socket.on('connect_error', (error) => {
-            console.log('connection error: ', error);
-            // stop polling on error
-            socket.close();
-          });
         }
       }
     },
     time: {
       timezoneOffset: 7 * 60
     }
+  };
+
+  return (
+    <HighchartsReact
+      highcharts={Highcharts}
+      constructorType={'stockChart'}
+      options={options}
+    />
+  )
+}
+
+function App() {
+  const [quote, setQuote] = useState({});
+  const [config, setConfig] = useState({
+    response: false
   });
+  const [data, setData] = useState([]);
+  const minutes = useRef(0);
 
   /**
    * Round timestamp down to the minute.
@@ -99,34 +95,50 @@ function App() {
   }
 
   useEffect(() => {
+    const socket = socketIOClient(`http://localhost:${http_port}`);
+    socket.on('connect', () => {
+      setConfig((config) => {
+        return {...config, response: true}
+      });
+    });
+
+    socket.on('message', function (msg) {
+      setQuote(msg);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.log('connection error: ', error);
+      // stop polling on error
+      socket.close();
+    });
+  }, []);
+
+  useEffect(() => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
       const {open, high, low, last} = quote.ohlc[0];
-      setOptions((options) => {
-        let currentData = [...options.series[0].data];
+      setData((data) => {
+        let updatedData = [...data];
         if (minutes.current === quoteMinutes) {
           // update last candlestick
-          currentData.splice(currentData.length - 1, 1,
+          updatedData.splice(updatedData.length - 1, 1,
             [getMinutes(quoteTime), open, high, low, last]);
         } else {
           // create new candlestick
           minutes.current = quoteMinutes;
-          currentData.push([getMinutes(quoteTime), open, high, low, last]);
+          updatedData.push([getMinutes(quoteTime), open, high, low, last]);
         }
-        return {...options, ...{series: [{data: currentData}]}};
+        return updatedData;
       });
     }
   }, [quote]);
 
+
   return (
     <div>
       {config.response ? <p/> : <p>Loading</p>}
-      <HighchartsReact
-        highcharts={Highcharts}
-        constructorType={'stockChart'}
-        options={options}
-      />
+      <Chart data={data}/>
     </div>
   )
 }

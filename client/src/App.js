@@ -1,82 +1,9 @@
 import React, {useEffect, useState, useRef} from 'react';
 import socketIOClient from 'socket.io-client';
-import Highcharts from 'highcharts/highstock';
-import HighchartsReact from 'highcharts-react-official';
 import './App.css';
+import {Chart} from './Chart'
 
 const http_port = 5000;
-
-function Chart({data}) {
-
-  const options = {
-    series: [{
-      data: data,
-      type: 'candlestick',
-      name: `CSCO Stock Price`,
-      id: 'csco'
-    }],
-    title: {
-      text: `CSCO Stock Price`
-    },
-    rangeSelector: {
-      buttons: [{
-        type: 'hour',
-        count: 1,
-        text: '1 min',
-        dataGrouping: {
-          forced: true,
-          units: [['minute', [1]]]
-        }
-      }, {
-        type: 'hour',
-        count: 2,
-        text: '2 min',
-        dataGrouping: {
-          forced: true,
-          units: [['minute', [2]]]
-        }
-      }, {
-        type: 'hour',
-        count: 2,
-        text: '5 min',
-        dataGrouping: {
-          forced: true,
-          units: [['minute', [5]]]
-        }
-      }, {
-        type: 'all',
-        text: 'All'
-      }],
-      buttonTheme: {
-        width: 60
-      },
-      selected: 3,
-      allButtonsEnabled: true,
-      inputEnabled: false
-    },
-    navigator: {
-      enabled: false
-    },
-    chart: {
-      animation: false,
-      events: {
-        load: function () {
-        }
-      }
-    },
-    time: {
-      timezoneOffset: 7 * 60
-    }
-  };
-
-  return (
-    <HighchartsReact
-      highcharts={Highcharts}
-      constructorType={'stockChart'}
-      options={options}
-    />
-  )
-}
 
 /**
  * Get nested property.
@@ -93,13 +20,15 @@ function Table({quote}) {
 
   let [time, open, high, low, lastPrice] = quote;
   let previousPrice = get(['4'], previousQuote.current);
-  let delta = 'unch';
+  let deltaDir = 'unch';
+  let delta = 0;
 
   if (lastPrice && previousPrice) {
-    if (lastPrice > previousPrice) {
-      delta = "up";
-    } else if (lastPrice < previousPrice){
-      delta = "down";
+    delta = Math.round((lastPrice - previousPrice) * 100) / 100;
+    if (delta > 0) {
+      deltaDir = "up";
+    } else if (delta < 0){
+      deltaDir = "down";
     }
   }
 
@@ -111,8 +40,8 @@ function Table({quote}) {
   return (
     <tr>
       <td>CSCO</td>
-      <td className={`delta-${delta} last`}>{lastPrice}</td>
-      <td>Change here</td>
+      <td className={`delta-${deltaDir} last`}>{lastPrice}</td>
+      <td>{delta}</td>
       <td>{open}</td>
       <td>{high}</td>
       <td>{low}</td>
@@ -185,6 +114,7 @@ function App() {
         <tr>
           <td>Symbol</td>
           <td>Last</td>
+          <td>Change</td>
           <td>Open</td>
           <td>High</td>
           <td>Low</td>

@@ -56,3 +56,7 @@ td.delta-up {
 td.delta-down {
   background-color: red;
 }
+
+td.delta-unch {
+  color: black;
+}

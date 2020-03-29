@@ -90,24 +90,16 @@ const get = (p, o) =>
 
 function Table({quote}) {
   let [previousQuote, setPreviousQuote] = useState({time: 0});
-  let delta = useRef("unch");
-  let timesDiffer = false;
 
-  if (previousQuote.time !== quote.time) {
-    timesDiffer = true;
-  }
+  let [time, open, high, low, lastPrice] = quote;
+  let previousPrice = get(['4'], previousQuote);
+  let delta = 'unch';
 
-  let ohlc = get(['ohlc','0'], quote) || [];
-  let lastPrice = get(['ohlc','0','last'], quote);
-  let previousPrice = get(['ohlc','0','last'], previousQuote);
-
-  if (lastPrice && previousPrice && timesDiffer) {
+  if (lastPrice && previousPrice) {
     if (lastPrice > previousPrice) {
-      delta.current = "up";
+      delta = "up";
     } else if (lastPrice < previousPrice){
-      delta.current = "down";
-    } else {
-      delta.current = "unch";
+      delta = "down";
     }
   }
 
@@ -119,17 +111,16 @@ function Table({quote}) {
   return (
     <tr>
       <td>CSCO</td>
-      <td className={`delta-${delta.current} last`}>{ohlc.last}</td>
+      <td className={`delta-${delta} last`}>{lastPrice}</td>
       <td>Change here</td>
-      <td>{ohlc.open}</td>
-      <td>{ohlc.high}</td>
-      <td>{ohlc.low}</td>
+      <td>{open}</td>
+      <td>{high}</td>
+      <td>{low}</td>
     </tr>
   );
 }
 
 function App() {
-  const [quote, setQuote] = useState({});
   const [config, setConfig] = useState({
     response: false
   });
@@ -145,26 +136,7 @@ function App() {
     return Math.floor(timestamp / 60000) * 60000;
   }
 
-  useEffect(() => {
-    const socket = socketIOClient(`http://localhost:${http_port}`);
-    socket.on('connect', () => {
-      setConfig((config) => {
-        return {...config, response: true}
-      });
-    });
-
-    socket.on('message', function (msg) {
-      setQuote(msg);
-    });
-
-    socket.on('connect_error', (error) => {
-      console.log('connection error: ', error);
-      // stop polling on error
-      socket.close();
-    });
-  }, []);
-
-  useEffect(() => {
+  const addQuote = (quote) => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
@@ -183,8 +155,26 @@ function App() {
         return updatedData;
       });
     }
-  }, [quote]);
+  }
 
+  useEffect(() => {
+    const socket = socketIOClient(`http://localhost:${http_port}`);
+    socket.on('connect', () => {
+      setConfig((config) => {
+        return {...config, response: true}
+      });
+    });
+
+    socket.on('message', function (quote) {
+      addQuote(quote);
+    });
+
+    socket.on('connect_error', (error) => {
+      console.log('connection error: ', error);
+      // stop polling on error
+      socket.close();
+    });
+  }, []);
 
   return (
     <div>
@@ -201,7 +191,7 @@ function App() {
         </tr>
         </thead>
         <tbody>
-            <Table quote={quote}/>
+        {data.length >= 1 && <Table quote={data[data.length - 1]}/> }
           </tbody>
       </table>
     </div>

@@ -89,10 +89,10 @@ const get = (p, o) =>
     (obj && obj[prop]) ? obj[prop] : null, o);
 
 function Table({quote}) {
-  let [previousQuote, setPreviousQuote] = useState({time: 0});
+  let previousQuote = useRef([]);
 
   let [time, open, high, low, lastPrice] = quote;
-  let previousPrice = get(['4'], previousQuote);
+  let previousPrice = get(['4'], previousQuote.current);
   let delta = 'unch';
 
   if (lastPrice && previousPrice) {
@@ -105,7 +105,7 @@ function Table({quote}) {
 
   // save quote for comparison with the next one
   useEffect(() => {
-    setPreviousQuote(quote);
+    previousQuote.current = quote;
   },[quote])
 
   return (

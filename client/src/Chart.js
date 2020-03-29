@@ -2,14 +2,14 @@ import HighchartsReact from "highcharts-react-official";
 import Highcharts from "highcharts/highstock";
 import React from "react";
 
-export function Chart({data}) {
+export function Chart({symbol, data}) {
 
   const options = {
     series: [{
       data: data,
       type: 'candlestick',
-      name: `CSCO Stock Price`,
-      id: 'csco'
+      name: `${symbol} Stock Price`,
+      id: [symbol]
     }],
     title: {
       text: `CSCO Stock Price`

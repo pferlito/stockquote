@@ -55,6 +55,7 @@ function App() {
   });
   const [data, setData] = useState([]);
   const minutes = useRef(0);
+  let currentSymbol = '';
 
   /**
    * Round timestamp down to the minute.
@@ -69,7 +70,8 @@ function App() {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
-      const {open, high, low, last} = quote.ohlc[0];
+      const {symbol, open, high, low, last} = quote.ohlc[0];
+      currentSymbol = symbol;
       setData((data) => {
         let updatedData = [...data];
         if (minutes.current === quoteMinutes) {
@@ -108,7 +110,7 @@ function App() {
   return (
     <div>
       {config.response ? <p/> : <p>Loading</p>}
-      <Chart data={data}/>
+      <Chart symbol={currentSymbol} data={data}/>
       <table className="holdings">
         <thead>
         <tr>

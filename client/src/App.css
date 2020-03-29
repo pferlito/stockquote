@@ -46,6 +46,9 @@ td,th {
   border-bottom: 1px solid #ddd;
 }
 
+td.last {
+  color: white;
+}
 td.delta-up {
   background-color: forestgreen;
 }

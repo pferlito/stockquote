@@ -113,7 +113,7 @@ function Table({quote}) {
   return (
     <tr>
       <td>CSCO</td>
-      <td className={"delta-" + delta.current}>{ohlc.last}</td>
+      <td className={`delta-${delta.current} last`}>{ohlc.last}</td>
       <td>{ohlc.open}</td>
       <td>{ohlc.high}</td>
       <td>{ohlc.low}</td>

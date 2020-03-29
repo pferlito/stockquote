@@ -78,42 +78,51 @@ function Chart({data}) {
   )
 }
 
+/**
+ * Get nested property.
+ * @param {array} p Path to property
+ * @param {object} o Object to inspect
+ * @returns {*}
+ */
+const get = (p, o) =>
+  p.reduce((obj, prop) =>
+    (obj && obj[prop]) ? obj[prop] : null, o);
+
 function Table({quote}) {
-  let lastQuote = useRef({});
+  let [previousQuote, setPreviousQuote] = useState({time: 0});
   let delta = useRef("unch");
   let timesDiffer = false;
-  if (lastQuote.current.time !== quote.time) {
+
+  if (previousQuote.time !== quote.time) {
     timesDiffer = true;
+  } else {
+    console.log('times are the same');
   }
 
-  let ohlc = [];
-  if (quote.hasOwnProperty('ohlc')) {
-    ohlc = quote.ohlc[0];
-  }
+  let ohlc = get(['ohlc','0'], quote) || [];
+  let lastPrice = get(['ohlc','0','last'], quote);
+  let previousPrice = get(['ohlc','0','last'], previousQuote);
 
-  let last_ohlc = [];
-  if (lastQuote.current.hasOwnProperty('ohlc')) {
-    last_ohlc = lastQuote.current.ohlc[0];
-  }
-
-  if (ohlc.hasOwnProperty('last') &&
-    last_ohlc.hasOwnProperty('last')
-    && timesDiffer) {
-    if (ohlc.last > last_ohlc.last) {
+  if (lastPrice && previousPrice && timesDiffer) {
+    if (lastPrice > previousPrice) {
       delta.current = "up";
-    } else if (ohlc.last < last_ohlc.last){
+    } else if (lastPrice < previousPrice){
       delta.current = "down";
     } else {
       delta.current = "unch";
     }
   }
 
-  lastQuote.current = {...quote};
+  // save quote for comparison with the next one
+  useEffect(() => {
+    setPreviousQuote(quote);
+  },[quote])
 
   return (
     <tr>
       <td>CSCO</td>
       <td className={`delta-${delta.current} last`}>{ohlc.last}</td>
+      <td>Change here</td>
       <td>{ohlc.open}</td>
       <td>{ohlc.high}</td>
       <td>{ohlc.low}</td>

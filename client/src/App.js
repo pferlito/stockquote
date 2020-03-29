@@ -95,8 +95,6 @@ function Table({quote}) {
 
   if (previousQuote.time !== quote.time) {
     timesDiffer = true;
-  } else {
-    console.log('times are the same');
   }
 
   let ohlc = get(['ohlc','0'], quote) || [];

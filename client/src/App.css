@@ -45,3 +45,11 @@ th, td {
 td,th {
   border-bottom: 1px solid #ddd;
 }
+
+td.delta-up {
+  background-color: forestgreen;
+}
+
+td.delta-up {
+  background-color: red;
+}

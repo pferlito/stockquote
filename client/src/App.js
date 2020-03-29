@@ -79,15 +79,41 @@ function Chart({data}) {
 }
 
 function Table({quote}) {
+  let lastQuote = useRef({});
+  let delta = useRef("unch");
+  let timesDiffer = false;
+  if (lastQuote.current.time !== quote.time) {
+    timesDiffer = true;
+  }
+
   let ohlc = [];
   if (quote.hasOwnProperty('ohlc')) {
-    console.log(quote.ohlc[0]);
     ohlc = quote.ohlc[0];
   }
+
+  let last_ohlc = [];
+  if (lastQuote.current.hasOwnProperty('ohlc')) {
+    last_ohlc = lastQuote.current.ohlc[0];
+  }
+
+  if (ohlc.hasOwnProperty('last') &&
+    last_ohlc.hasOwnProperty('last')
+    && timesDiffer) {
+    if (ohlc.last > last_ohlc.last) {
+      delta.current = "up";
+    } else if (ohlc.last < last_ohlc.last){
+      delta.current = "down";
+    } else {
+      delta.current = "unch";
+    }
+  }
+
+  lastQuote.current = {...quote};
+
   return (
     <tr>
       <td>CSCO</td>
-      <td>{ohlc.last}</td>
+      <td className={"delta-" + delta.current}>{ohlc.last}</td>
       <td>{ohlc.open}</td>
       <td>{ohlc.high}</td>
       <td>{ohlc.low}</td>

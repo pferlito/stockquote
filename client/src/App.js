@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import * as io from 'socket.io-client';
+import io from 'socket.io-client';
 import './App.css';
 import {Chart} from './Chart'
 

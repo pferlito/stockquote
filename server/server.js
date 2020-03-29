@@ -12,6 +12,12 @@ let stocks = [{
   high: 50,
   low: 50,
   last: 50
+},{
+  symbol: 'AAPL',
+  open: 250,
+  high: 250,
+  low: 250,
+  last: 250
 }];
 const sigma = 0.25; // standard deviation
 // Brownian motion formula
@@ -59,7 +65,7 @@ let interval;
 let currentMinutes = new Date().getMinutes();
 
 io.on('connection', function (socket) {
-  socket.join('CSCO');
+  socket.join(['CSCO']);
   interval = setInterval(() => {
     const minutes = new Date().getMinutes();
     let rollover = false;
@@ -68,8 +74,12 @@ io.on('connection', function (socket) {
       rollover = true;
     }
     const priceData = updateStocks(stocks, rollover);
-    io.to('CSCO').emit('message', {time: Date.now(), ohlc: priceData});
-    console.log([Date.now(), priceData]);
+    priceData.forEach((stock) => {
+      let symbol = stock.symbol;
+      let message = {time: Date.now(), ohlc: stock};
+      io.to(symbol).emit('message', message);
+      console.log(message);
+    });
   }, 3000)
 });
 

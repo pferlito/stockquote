@@ -71,7 +71,7 @@ function App() {
   });
   const [data, setData] = useState([]);
   const minutes = useRef(0);
-  let currentSymbol = '';
+  let currentSymbol = 'CSCO';
 
   /**
    * Round timestamp down to the minute.
@@ -82,12 +82,12 @@ function App() {
     return Math.floor(timestamp / 60000) * 60000;
   }
 
+  // Add new quote to price history
   const addQuote = useCallback((quote) => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
-      const {symbol, open, high, low, last} = quote.ohlc[0];
-      currentSymbol = symbol;
+      const {symbol, open, high, low, last} = quote.ohlc;
       setData((data) => {
         let updatedData = [...data];
         if (minutes.current === quoteMinutes) {

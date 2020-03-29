@@ -59,6 +59,7 @@ let interval;
 let currentMinutes = new Date().getMinutes();
 
 io.on('connection', function (socket) {
+  socket.join('CSCO');
   interval = setInterval(() => {
     const minutes = new Date().getMinutes();
     let rollover = false;
@@ -67,7 +68,7 @@ io.on('connection', function (socket) {
       rollover = true;
     }
     const priceData = updateStocks(stocks, rollover);
-    io.emit('message', {time: Date.now(), ohlc: priceData});
+    io.to('CSCO').emit('message', {time: Date.now(), ohlc: priceData});
     console.log([Date.now(), priceData]);
   }, 3000)
 });

@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useRef} from 'react';
-import socketIOClient from 'socket.io-client';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
+import * as io from 'socket.io-client';
 import './App.css';
 import {Chart} from './Chart'
 
@@ -15,6 +15,22 @@ const get = (p, o) =>
   p.reduce((obj, prop) =>
     (obj && obj[prop]) ? obj[prop] : null, o);
 
+/**
+ * data = [{
+ *  symbol: 'CSCO',
+ *  quotes: [
+ *    [123456,49.97,49.98,49.55,49.97],
+ *    [123456,49.97,49.98,49.55,49.97]
+ *  ]
+ * },
+ * {
+ *  symbol: 'AAPL',
+ *  quotes: [
+ *    [123456,49.97,49.98,49.55,49.97],
+ *    [123456,49.97,49.98,49.55,49.97]
+ *  ]
+ * }]
+ */
 function Table({quote}) {
   let previousQuote = useRef([]);
 
@@ -66,7 +82,7 @@ function App() {
     return Math.floor(timestamp / 60000) * 60000;
   }
 
-  const addQuote = (quote) => {
+  const addQuote = useCallback((quote) => {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
@@ -86,11 +102,15 @@ function App() {
         return updatedData;
       });
     }
-  }
+  },[]);
 
   useEffect(() => {
-    const socket = socketIOClient(`http://localhost:${http_port}`);
+    const socket = io(`http://localhost:${http_port}`);
+
     socket.on('connect', () => {
+      setConfig((config) => {
+        return {...config, response: true}
+      });
       setConfig((config) => {
         return {...config, response: true}
       });
@@ -105,7 +125,7 @@ function App() {
       // stop polling on error
       socket.close();
     });
-  }, []);
+  }, [addQuote]);
 
   return (
     <div>

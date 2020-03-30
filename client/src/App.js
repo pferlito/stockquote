@@ -56,7 +56,50 @@ const getLastQuote = (symbol, data) => {
   return quotes.length ? quotes[quotes.length - 1] : [];
 }
 
-function Table({quote}) {
+/*
+  tableData = [[
+    'AAPL', {
+      symbol: 'AAPL',
+      quote: [12341251, 50.0, 49.8, 49.56, 50.01]
+    }
+  ],[
+    'CSCO', {
+      symbol: 'CSCO',
+      quote: [12341251, 50.0, 49.8, 49.56, 50.01]
+    }
+  ]]
+
+ */
+
+function Table({tableData}) {
+  let output = [];
+  for (const [symbol, rowData] of tableData) {
+    output.push (<TableRow key={symbol} rowData={rowData} />)
+  }
+  return output;
+}
+
+function TableRow({rowData}) {
+  let symbol = rowData.symbol;
+  let quote = rowData.quote;
+  let [time, open, high, low, last] = quote;
+  let deltaDir = 'unch';
+  let delta = 0;
+
+  return (
+    <tr>
+      <td>{symbol}</td>
+      <td className={`delta-${deltaDir} last`}>{last.toFixed(2)}</td>
+      <td>{delta.toFixed(2)}</td>
+      <td>{open.toFixed(2)}</td>
+      <td>{high.toFixed(2)}</td>
+      <td>{low.toFixed(2)}</td>
+    </tr>
+  );
+}
+
+/*
+function TableRow({quote}) {
   let previousQuote = useRef([]);
 
   let [time, open, high, low, lastPrice] = quote;
@@ -89,7 +132,7 @@ function Table({quote}) {
     </tr>
   );
 }
-
+*/
 /**
  * data = {
  * 'CSCO': {
@@ -116,8 +159,6 @@ function App() {
   const minutes = useRef(0);
   let currentSymbol = 'CSCO';
 
-
-
   // Add new quote to price history
   const addQuote = useCallback((quote) => {
     if (quote.hasOwnProperty('ohlc')) {
@@ -126,16 +167,16 @@ function App() {
       const {symbol, open, high, low, last} = quote.ohlc;
       setData((data) => {
         let clonedData = new Map(data);
-        if (!clonedData.has(currentSymbol)) {
-          clonedData.set(currentSymbol, getEmptyQuote(currentSymbol));
+        if (!clonedData.has(symbol)) {
+          clonedData.set(symbol, getEmptyQuote(symbol));
         }
-        let quotes = clonedData.get(currentSymbol).quotes;
+        let quotes = clonedData.get(symbol).quotes;
         if (minutes.current === quoteMinutes) {
-          // update last candlestick
+          // update last quote
           quotes.splice(quotes.length - 1, 1,
             [getMinutes(quoteTime), open, high, low, last]);
         } else {
-          // create new candlestick
+          // create new quote
           minutes.current = quoteMinutes;
           quotes.push([getMinutes(quoteTime), open, high, low, last]);
         }
@@ -167,7 +208,19 @@ function App() {
     });
   }, [addQuote]);
 
-  let lastQuote = getLastQuote(currentSymbol, data);
+  const getTableData = (data) => {
+    const tableData = new Map();
+    if (data.size) {
+      for (let symbol of data.keys()) {
+        let newObj = {symbol};
+        newObj.quote = getLastQuote(symbol, data);
+        tableData.set(symbol, newObj);
+      }
+    }
+    return tableData;
+  }
+
+  let tableData = getTableData(data);
   let chartData = getQuotes(currentSymbol, data);
 
   return (
@@ -186,7 +239,8 @@ function App() {
         </tr>
         </thead>
         <tbody>
-        {lastQuote.length >= 1 && <Table quote={lastQuote}/>}
+        <Table tableData={tableData} />
+        {/*tableData.length >= 1 && <TableRow quote={tableData}/>*/}
         </tbody>
       </table>
     </div>

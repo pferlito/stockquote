@@ -15,22 +15,7 @@ const get = (p, o) =>
   p.reduce((obj, prop) =>
     (obj && obj[prop]) ? obj[prop] : null, o);
 
-/**
- * data = [{
- *  symbol: 'CSCO',
- *  quotes: [
- *    [123456,49.97,49.98,49.55,49.97],
- *    [123456,49.97,49.98,49.55,49.97]
- *  ]
- * },
- * {
- *  symbol: 'AAPL',
- *  quotes: [
- *    [123456,49.97,49.98,49.55,49.97],
- *    [123456,49.97,49.98,49.55,49.97]
- *  ]
- * }]
- */
+
 function Table({quote}) {
   let previousQuote = useRef([]);
 
@@ -65,6 +50,22 @@ function Table({quote}) {
   );
 }
 
+/**
+ * data = [{
+ *  symbol: 'CSCO',
+ *  quotes: [
+ *    [123456,49.97,49.98,49.55,49.97],
+ *    [123456,49.97,49.98,49.55,49.97]
+ *  ]
+ * },
+ * {
+ *  symbol: 'AAPL',
+ *  quotes: [
+ *    [123456,49.97,49.98,49.55,49.97],
+ *    [123456,49.97,49.98,49.55,49.97]
+ *  ]
+ * }]
+ */
 function App() {
   const [config, setConfig] = useState({
     response: false
@@ -127,6 +128,8 @@ function App() {
     });
   }, [addQuote]);
 
+  let dataForTable = data[data.length - 1] || [];
+
   return (
     <div>
       {config.response ? <p/> : <p>Loading</p>}
@@ -143,7 +146,7 @@ function App() {
         </tr>
         </thead>
         <tbody>
-        {data.length >= 1 && <Table quote={data[data.length - 1]}/> }
+        {dataForTable.length >= 1 && <Table quote={dataForTable}/> }
           </tbody>
       </table>
     </div>

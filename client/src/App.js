@@ -5,6 +5,22 @@ import {Chart} from './Chart'
 
 const http_port = 5000;
 
+const getEmptyQuote = (symbol) => {
+  return {
+    symbol,
+    quotes: []
+  }
+}
+
+/**
+ * Round timestamp down to the minute.
+ * @param {string} timestamp
+ * @returns {string}
+ */
+const getMinutes = (timestamp) => {
+  return Math.floor(timestamp / 60000) * 60000;
+}
+
 /**
  * Get nested property.
  * @param {array} p Path to property
@@ -15,6 +31,30 @@ const get = (p, o) =>
   p.reduce((obj, prop) =>
     (obj && obj[prop]) ? obj[prop] : null, o);
 
+/**
+ * Get Price quotes for a symbol.
+ * @param {string} symbol
+ * @param {Map} data
+ * @returns {array}
+ */
+const getQuotes = (symbol, data) => {
+  let quotes = [];
+  if (data.size) {
+    quotes = data.get(symbol).quotes;
+  }
+  return quotes;
+}
+
+/**
+ * Get latest price quote for a symbol.
+ * @param {symbol} symbol
+ * @param {Map} data
+ * @returns {array}
+ */
+const getLastQuote = (symbol, data) => {
+  let quotes = getQuotes(symbol, data);
+  return quotes.length ? quotes[quotes.length - 1] : [];
+}
 
 function Table({quote}) {
   let previousQuote = useRef([]);
@@ -28,7 +68,7 @@ function Table({quote}) {
     delta = Math.round((lastPrice - previousPrice) * 100) / 100;
     if (delta > 0) {
       deltaDir = "up";
-    } else if (delta < 0){
+    } else if (delta < 0) {
       deltaDir = "down";
     }
   }
@@ -36,7 +76,7 @@ function Table({quote}) {
   // save quote for comparison with the next one
   useEffect(() => {
     previousQuote.current = quote;
-  },[quote])
+  }, [quote])
 
   return (
     <tr>
@@ -51,37 +91,32 @@ function Table({quote}) {
 }
 
 /**
- * data = [{
+ * data = {
+ * 'CSCO': {
  *  symbol: 'CSCO',
  *  quotes: [
  *    [123456,49.97,49.98,49.55,49.97],
  *    [123456,49.97,49.98,49.55,49.97]
  *  ]
  * },
- * {
+ * 'AAPL': {
  *  symbol: 'AAPL',
  *  quotes: [
  *    [123456,49.97,49.98,49.55,49.97],
  *    [123456,49.97,49.98,49.55,49.97]
  *  ]
- * }]
+ * }
+ * }
  */
 function App() {
   const [config, setConfig] = useState({
     response: false
   });
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(new Map());
   const minutes = useRef(0);
   let currentSymbol = 'CSCO';
 
-  /**
-   * Round timestamp down to the minute.
-   * @param {string} timestamp
-   * @returns {string}
-   */
-  const getMinutes = (timestamp) => {
-    return Math.floor(timestamp / 60000) * 60000;
-  }
+
 
   // Add new quote to price history
   const addQuote = useCallback((quote) => {
@@ -90,20 +125,24 @@ function App() {
       const quoteMinutes = new Date(quoteTime).getMinutes();
       const {symbol, open, high, low, last} = quote.ohlc;
       setData((data) => {
-        let updatedData = [...data];
+        let clonedData = new Map(data);
+        if (!clonedData.has(currentSymbol)) {
+          clonedData.set(currentSymbol, getEmptyQuote(currentSymbol));
+        }
+        let quotes = clonedData.get(currentSymbol).quotes;
         if (minutes.current === quoteMinutes) {
           // update last candlestick
-          updatedData.splice(updatedData.length - 1, 1,
+          quotes.splice(quotes.length - 1, 1,
             [getMinutes(quoteTime), open, high, low, last]);
         } else {
           // create new candlestick
           minutes.current = quoteMinutes;
-          updatedData.push([getMinutes(quoteTime), open, high, low, last]);
+          quotes.push([getMinutes(quoteTime), open, high, low, last]);
         }
-        return updatedData;
+        return clonedData;
       });
     }
-  },[]);
+  }, []);
 
   useEffect(() => {
     const socket = io(`http://localhost:${http_port}`);
@@ -128,12 +167,13 @@ function App() {
     });
   }, [addQuote]);
 
-  let dataForTable = data[data.length - 1] || [];
+  let lastQuote = getLastQuote(currentSymbol, data);
+  let chartData = getQuotes(currentSymbol, data);
 
   return (
     <div>
       {config.response ? <p/> : <p>Loading</p>}
-      <Chart symbol={currentSymbol} data={data}/>
+      <Chart symbol={currentSymbol} data={chartData}/>
       <table className="holdings">
         <thead>
         <tr>
@@ -146,8 +186,8 @@ function App() {
         </tr>
         </thead>
         <tbody>
-        {dataForTable.length >= 1 && <Table quote={dataForTable}/> }
-          </tbody>
+        {lastQuote.length >= 1 && <Table quote={lastQuote}/>}
+        </tbody>
       </table>
     </div>
   )

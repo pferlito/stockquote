@@ -11,13 +11,15 @@ let stocks = [{
   open: 50,
   high: 50,
   low: 50,
-  last: 50
+  last: 50,
+  lastClose: 49.8
 },{
   symbol: 'AAPL',
   open: 250,
   high: 250,
   low: 250,
-  last: 250
+  last: 250,
+  lastClose: 249.8
 }];
 const sigma = 0.25; // standard deviation
 // Brownian motion formula

@@ -82,9 +82,14 @@ function Table({tableData}) {
 function TableRow({rowData}) {
   let symbol = rowData.symbol;
   let quote = rowData.quote;
-  let [time, open, high, low, last] = quote;
+  let [time, open, high, low, last, lastClose] = quote;
   let deltaDir = 'unch';
-  let delta = 0;
+  let delta = last - lastClose;
+  if (delta > 0) {
+    deltaDir = 'up';
+  } else if (delta < 0) {
+    deltaDir = 'down'
+  }
 
   return (
     <tr>
@@ -98,41 +103,6 @@ function TableRow({rowData}) {
   );
 }
 
-/*
-function TableRow({quote}) {
-  let previousQuote = useRef([]);
-
-  let [time, open, high, low, lastPrice] = quote;
-  let previousPrice = get(['4'], previousQuote.current);
-  let deltaDir = 'unch';
-  let delta = 0;
-
-  if (lastPrice && previousPrice) {
-    delta = Math.round((lastPrice - previousPrice) * 100) / 100;
-    if (delta > 0) {
-      deltaDir = "up";
-    } else if (delta < 0) {
-      deltaDir = "down";
-    }
-  }
-
-  // save quote for comparison with the next one
-  useEffect(() => {
-    previousQuote.current = quote;
-  }, [quote])
-
-  return (
-    <tr>
-      <td>CSCO</td>
-      <td className={`delta-${deltaDir} last`}>{lastPrice}</td>
-      <td>{delta}</td>
-      <td>{open}</td>
-      <td>{high}</td>
-      <td>{low}</td>
-    </tr>
-  );
-}
-*/
 /**
  * data = {
  * 'CSCO': {
@@ -164,7 +134,7 @@ function App() {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
-      const {symbol, open, high, low, last} = quote.ohlc;
+      const {symbol, open, high, low, last, lastClose} = quote.ohlc;
       setData((data) => {
         let clonedData = new Map(data);
         if (!clonedData.has(symbol)) {
@@ -174,11 +144,11 @@ function App() {
         if (minutes.current === quoteMinutes) {
           // update last quote
           quotes.splice(quotes.length - 1, 1,
-            [getMinutes(quoteTime), open, high, low, last]);
+            [getMinutes(quoteTime), open, high, low, last, lastClose]);
         } else {
           // create new quote
           minutes.current = quoteMinutes;
-          quotes.push([getMinutes(quoteTime), open, high, low, last]);
+          quotes.push([getMinutes(quoteTime), open, high, low, last, lastClose]);
         }
         return clonedData;
       });
@@ -240,7 +210,6 @@ function App() {
         </thead>
         <tbody>
         <Table tableData={tableData} />
-        {/*tableData.length >= 1 && <TableRow quote={tableData}/>*/}
         </tbody>
       </table>
     </div>

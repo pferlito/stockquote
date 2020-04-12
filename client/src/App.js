@@ -160,6 +160,7 @@ function App() {
     const socket = io(`http://localhost:${http_port}`);
 
     socket.on('connect', () => {
+      socket.emit('join-room' , ['AAPL','CSCO']);
       setConfig((config) => {
         return {...config, response: true}
       });

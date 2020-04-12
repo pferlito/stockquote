@@ -99,6 +99,7 @@ function TableRow({rowData}) {
       <td>{open.toFixed(2)}</td>
       <td>{high.toFixed(2)}</td>
       <td>{low.toFixed(2)}</td>
+      <td>{lastClose.toFixed(2)}</td>
     </tr>
   );
 }
@@ -206,6 +207,7 @@ function App() {
           <td>Open</td>
           <td>High</td>
           <td>Low</td>
+          <td>Previous Close</td>
         </tr>
         </thead>
         <tbody>

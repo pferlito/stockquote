@@ -39,7 +39,7 @@
 
 th, td {
   padding: 15px;
-  text-align: left;
+  text-align: right;
 }
 
 td,th {
@@ -48,6 +48,7 @@ td,th {
 
 td.last {
   color: white;
+  min-width: 53px;
 }
 td.delta-up {
   background-color: forestgreen;

@@ -36,6 +36,8 @@ app.use(express.static('public'));
  */
 function updateStock(stock, rollover) {
   const delta = rnFn();
+  // tickDelta is sign of change from last tick
+  stock.tickDelta = Math.sign(delta);
   stock.last = stock.last + delta;
   // round to 2 decimal places
   stock.last = Math.round(stock.last * 100) / 100;

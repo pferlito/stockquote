@@ -82,12 +82,12 @@ function Table({tableData}) {
 function TableRow({rowData}) {
   let symbol = rowData.symbol;
   let quote = rowData.quote;
-  let [time, open, high, low, last, lastClose] = quote;
+  let [time, open, high, low, last, lastClose, tickDelta] = quote;
   let deltaDir = 'unch';
   let delta = last - lastClose;
-  if (delta > 0) {
+  if (tickDelta > 0) {
     deltaDir = 'up';
-  } else if (delta < 0) {
+  } else if (tickDelta < 0) {
     deltaDir = 'down'
   }
 
@@ -135,7 +135,7 @@ function App() {
     if (quote.hasOwnProperty('ohlc')) {
       const quoteTime = quote.time;
       const quoteMinutes = new Date(quoteTime).getMinutes();
-      const {symbol, open, high, low, last, lastClose} = quote.ohlc;
+      const {symbol, open, high, low, last, lastClose, tickDelta} = quote.ohlc;
       setData((data) => {
         let clonedData = new Map(data);
         if (!clonedData.has(symbol)) {
@@ -145,11 +145,11 @@ function App() {
         if (minutes.current === quoteMinutes) {
           // update last quote
           quotes.splice(quotes.length - 1, 1,
-            [getMinutes(quoteTime), open, high, low, last, lastClose]);
+            [getMinutes(quoteTime), open, high, low, last, lastClose, tickDelta]);
         } else {
           // create new quote
           minutes.current = quoteMinutes;
-          quotes.push([getMinutes(quoteTime), open, high, low, last, lastClose]);
+          quotes.push([getMinutes(quoteTime), open, high, low, last, lastClose, tickDelta]);
         }
         return clonedData;
       });
@@ -160,9 +160,6 @@ function App() {
     const socket = io(`http://localhost:${http_port}`);
 
     socket.on('connect', () => {
-      setConfig((config) => {
-        return {...config, response: true}
-      });
       setConfig((config) => {
         return {...config, response: true}
       });

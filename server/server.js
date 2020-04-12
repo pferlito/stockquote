@@ -67,7 +67,7 @@ let interval;
 let currentMinutes = new Date().getMinutes();
 
 io.on('connection', function (socket) {
-  socket.join(['CSCO']);
+  socket.join(['AAPL','CSCO']);
   interval = setInterval(() => {
     const minutes = new Date().getMinutes();
     let rollover = false;

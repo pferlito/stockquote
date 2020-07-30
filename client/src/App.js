@@ -39,7 +39,7 @@ const get = (p, o) =>
  */
 const getQuotes = (symbol, data) => {
   let quotes = [];
-  if (data.size) {
+  if (data.size && data.has(symbol)) {
     quotes = data.get(symbol).quotes;
   }
   return quotes;
@@ -128,7 +128,7 @@ function App() {
   });
   const [data, setData] = useState(new Map());
   const minutes = useRef(0);
-  let currentSymbol = 'CSCO';
+  let currentSymbol = 'AAPL';
 
   // Add new quote to price history
   const addQuote = useCallback((quote) => {

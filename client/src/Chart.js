@@ -12,7 +12,7 @@ export function Chart({symbol, data}) {
       id: [symbol]
     }],
     title: {
-      text: `CSCO Stock Price`
+      text: `${symbol} Stock Price`
     },
     rangeSelector: {
       buttons: [{

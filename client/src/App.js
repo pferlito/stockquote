@@ -127,7 +127,7 @@ function App() {
     response: false
   });
   const [data, setData] = useState(new Map());
-  const minutes = useRef(0);
+  const minutes = useRef(new Map());
   let currentSymbol = 'AAPL';
 
   // Add new quote to price history
@@ -142,13 +142,13 @@ function App() {
           clonedData.set(symbol, getEmptyQuote(symbol));
         }
         let quotes = clonedData.get(symbol).quotes;
-        if (minutes.current === quoteMinutes) {
+        if (minutes.current.get(symbol) === quoteMinutes) {
           // update last quote
           quotes.splice(quotes.length - 1, 1,
             [getMinutes(quoteTime), open, high, low, last, lastClose, tickDelta]);
         } else {
           // create new quote
-          minutes.current = quoteMinutes;
+          minutes.current.set(symbol,quoteMinutes);
           quotes.push([getMinutes(quoteTime), open, high, low, last, lastClose, tickDelta]);
         }
         return clonedData;
